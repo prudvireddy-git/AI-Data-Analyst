@@ -5,7 +5,6 @@ import sqlite3
 import os
 import traceback
 from typing import Dict
-import ollama
 import json
 import re
 from langchain_groq import ChatGroq
@@ -120,3 +119,4 @@ Return ONLY valid JSON in this format:
         fig.update_layout(title=f"{chart_type} Chart")
 
         return fig    
+
