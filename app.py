@@ -3,110 +3,13 @@
 import streamlit as st
 import pandas as pd
 import sqlite3
-import os
-import traceback
 from typing import Dict
 
-
-from langchain_community.llms import Ollama
-
-client = Ollama(model="deepseek-r1:8b")
+from agents import AnalystAgent,VisualizationAgent,InsightAgent,DataCleanerAgent
 
 
-    
-def call_llm(prompt: str) -> str:
-    return client.invoke(prompt)
 
 
-class DataCleanerAgent:
-    def run(self, df: pd.DataFrame) -> pd.DataFrame:
-        df = df.copy()
-        df.drop_duplicates(inplace=True)
-        for col in df.columns:
-            if df[col].dtype != "object":
-                df[col].fillna(df[col].median(), inplace=True)
-            else:
-                df[col].fillna(df[col].mode()[0] if not df[col].mode().empty else "Unknown", inplace=True)
-        return df
-
-
-class AnalystAgent:
-    def run(self, df: pd.DataFrame, question: str) -> Dict:
-        prompt = f"""
-You are a data analyst.
-Dataset columns: {list(df.columns)}
-Question: {question}
-Write ONLY pandas code. Assume df is available.
-pls give less and accurate response
-"""
-        code = call_llm(prompt).strip()
-        local_env = {"df": df.copy(), "pd": pd}
-        exec(code, {}, local_env)
-        return {"code": code, "output": local_env.get("result", None)}
-
-
-class InsightAgent:
-    def run(self, df: pd.DataFrame) -> str:
-        prompt = f"""
-Summarize key insights for this dataset.
-Columns: {list(df.columns)}
-Describe trends, risks, and business value.
-"""
-        return call_llm(prompt)
-
-
-class VisualizationAgent:
-    def recommend_chart(self, df: pd.DataFrame, prompt: str) -> dict:
-        llm_prompt = f"""
-You are an expert data visualization analyst.
-
-Dataset columns: {list(df.columns)}
-User request: {prompt}
-
-Choose the BEST visualization and aggregation strategy.
-
-Allowed chart_type: Bar, Line, Histogram, Box
-Allowed aggregate_func: sum, mean, count, none
-
-Rules:
-- Use aggregation only when grouping is needed
-- Histogram and Box must use aggregate_func = none
-
-Return STRICT JSON with keys:
-chart_type, x, y, aggregate_func
-"""
-        response = call_llm(llm_prompt)
-        return eval(response)
-
-    def run(self, df: pd.DataFrame, chart_type: str, x_col: str = None, y_col: str = None, aggregate_func: str = "none"):
-        import plotly.express as px
-        import plotly.graph_objects as go
-
-        fig = None
-
-        if chart_type in ["Bar", "Line"]:
-            if aggregate_func == "sum":
-                data = df.groupby(x_col)[y_col].sum().reset_index()
-            elif aggregate_func == "mean":
-                data = df.groupby(x_col)[y_col].mean().reset_index()
-            elif aggregate_func == "count":
-                data = df.groupby(x_col)[y_col].count().reset_index()
-            else:
-                data = df[[x_col, y_col]]
-
-            if chart_type == "Bar":
-                fig = px.bar(data, x=x_col, y=y_col)
-            else:
-                fig = px.line(data, x=x_col, y=y_col)
-
-        elif chart_type == "Histogram":
-            fig = px.histogram(df, x=x_col)
-
-        elif chart_type == "Box":
-            fig = px.box(df, y=x_col)
-
-        fig.update_layout(title=f"{chart_type} Chart")
-        return fig
 
 
 
@@ -115,7 +18,7 @@ st.set_page_config(" AI Data Analyst", layout="wide")
 # Session state to store cleaned data
 if "cleaned_df" not in st.session_state:
     st.session_state.cleaned_df = None
-st.title("🚀 Hackathon AI Data Analyst")
+st.title("🚀 AI Data Analyst")
 st.caption("LLM + Multi-Agent + CSV + SQL")
 
 source = st.sidebar.selectbox("Select Data Source", ["CSV", "SQLite"])
@@ -128,7 +31,7 @@ if source == "CSV":
 
 
 else:
-    conn = sqlite3.connect(":memory:")
+    conn = sqlite3.connect("data.db")
     st.sidebar.info("Using in-memory SQLite")
     sql_file = st.sidebar.file_uploader("Upload CSV to load into SQL", type=["csv"])
     if sql_file:
@@ -158,35 +61,7 @@ if 'df' in locals():
             file_name="cleaned_data.csv",
             mime="text/csv"
         )
-
-    # ANALYST AGENT
-    st.subheader("💬 Analyst Chat")
-
-    if "chat_history" not in st.session_state:
-        st.session_state.chat_history = []
-
-    # Display chat history
-    for msg in st.session_state.chat_history:
-        with st.chat_message(msg["role"]):
-            st.markdown(msg["content"])
-
-    # Chat input
-    user_msg = st.chat_input("Ask a question about your data")
-
-    if user_msg:
-        st.session_state.chat_history.append({"role": "user", "content": user_msg})
-
-        with st.chat_message("user"):
-            st.markdown(user_msg)
-
-        with st.chat_message("assistant"):
-            data_for_analysis = st.session_state.cleaned_df if st.session_state.cleaned_df is not None else df
-            analyst = AnalystAgent()
-            result = analyst.run(data_for_analysis, user_msg)
-            st.markdown("Here is the generated Pandas logic:")
-            st.code(result["code"], language="python")
-
-        st.session_state.chat_history.append({"role": "assistant", "content": "Generated analysis code and result."})
+    st.markdown("---")
 
     # VISUALIZATION AGENT
     st.subheader("📊 Visualization Agent (LLM-powered)")
@@ -222,7 +97,7 @@ if 'df' in locals():
                 rec.get("chart_type"),
                 rec.get("x"),
                 rec.get("y"),
-                rec.get("aggregate_func", "none")
+                rec.get("aggregate_func")
             )
                 st.markdown(f"**LLM choice:** {rec['chart_type']} | Aggregation: {rec['aggregate_func']}")
                 st.plotly_chart(fig, use_container_width=True)
@@ -235,12 +110,15 @@ if 'df' in locals():
         if chart_type in ["Bar", "Line"]:
             x_col = st.selectbox("Select X Column", data_for_viz.columns)
             y_col = st.selectbox("Select Y Column", data_for_viz.select_dtypes(include="number").columns)
+            agg=st.selectbox("Select Aggregation Function",["sum",'mean','count',"none"])
         else:
+            
             x_col = st.selectbox("Select Numeric Column", data_for_viz.select_dtypes(include="number").columns)
             y_col = None
+            agg = None
 
         if st.button("Generate Visualization"):
-            fig = viz_agent.run(data_for_viz, chart_type, x_col, y_col)
+            fig = viz_agent.run(data_for_viz, chart_type, x_col, y_col, aggregate_func=agg)
             st.plotly_chart(fig, use_container_width=True)
 
     if fig is not None:
@@ -253,13 +131,42 @@ if 'df' in locals():
             file_name="chart.png",
             mime="image/png"
         )
-
+    st.markdown("---")
     # INSIGHT AGENT
     st.subheader("🧠 Insight Agent")
     if st.button("Generate Insights"):
         insight = InsightAgent().run(df)
         st.write(insight)
+    st.markdown("---")
+    # ANALYST AGENT
+    st.subheader("💬 Analyst Chat")
 
+    if "chat_history" not in st.session_state:
+        st.session_state.chat_history = []
+
+    # Display chat history
+    for msg in st.session_state.chat_history:
+        with st.chat_message(msg["role"]):
+            st.markdown(msg["content"])
+
+    # Chat input
+    user_msg = st.chat_input("Ask a question about your data")
+
+    if user_msg:
+        st.session_state.chat_history.append({"role": "user", "content": user_msg})
+
+        with st.chat_message("user"):
+            st.markdown(user_msg)
+
+        with st.chat_message("assistant"):
+            data_for_analysis = st.session_state.cleaned_df if st.session_state.cleaned_df is not None else df
+            analyst = AnalystAgent()
+            result = analyst.run(data_for_analysis, user_msg)
+            st.markdown("Here is the generated Pandas logic:")
+            st.code(result)
+
+        st.session_state.chat_history.append({"role": "assistant", "content": "Generated analysis code and result."})
+    
 else:
     st.info("Upload data to begin")
 
