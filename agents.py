@@ -19,8 +19,10 @@ load_dotenv()
 #os.environ["LANGCHAIN_API_KEY"]=os.getenv("LANGCHAIN_API_KEY")
 #os.environ["LANGCHAIN_TRACING_V2"]="true"
 #os.environ["LANGCHAIN_PROJECT"]="AI DATA ANALYST"
+
+os.environ["GROQ_API_KEY"] = st.secrets["GROQ_API_KEY"]
 groq_api_key=os.getenv("GROQ_API_KEY")
-client_groq=ChatGroq(groq_api_key=groq_api_key,model_name='llama-3.1-8b-instant')
+client_groq=ChatGroq(groq_api_key=st.secrets["GROQ_API_KEY"],model_name='llama-3.1-8b-instant')
 
 
 def call_llm(prompt: str) -> str:
@@ -119,4 +121,5 @@ Return ONLY valid JSON in this format:
         fig.update_layout(title=f"{chart_type} Chart")
 
         return fig    
+
 
