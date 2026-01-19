@@ -42,7 +42,7 @@ Summarize key insights for this dataset.
 Columns: {list(df.columns)}
 Describe trends, risks, and business value.
 """
-        return call_llm(prompt) 
+        return call_llm(prompt).content 
             
 class DataCleanerAgent:
     def run(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -129,6 +129,7 @@ Return ONLY valid JSON in this format:
         fig.update_layout(title=f"{chart_type} Chart")
 
         return fig    
+
 
 
 
