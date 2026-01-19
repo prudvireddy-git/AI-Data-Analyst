@@ -94,7 +94,8 @@ Return ONLY valid JSON in this format:
         }}
         """
         response = call_llm(llm_prompt)
-        cleaned = re.sub(r"```json|```", "", response).strip()
+        response_text = response.content
+        cleaned = re.sub(r"```json|```", "", response_text).strip()
 
         return json.loads(cleaned)
 
@@ -128,6 +129,7 @@ Return ONLY valid JSON in this format:
         fig.update_layout(title=f"{chart_type} Chart")
 
         return fig    
+
 
 
 
