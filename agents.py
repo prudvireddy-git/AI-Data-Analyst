@@ -21,12 +21,12 @@ load_dotenv()
 #os.environ["LANGCHAIN_PROJECT"]="AI DATA ANALYST"
 
 os.environ["GROQ_API_KEY"] = st.secrets["GROQ_API_KEY"]
-groq_api_key=os.getenv("GROQ_API_KEY")
+#groq_api_key=os.getenv("GROQ_API_KEY")
 client_groq=ChatGroq(groq_api_key=st.secrets["GROQ_API_KEY"],model_name='llama-3.1-8b-instant')
 
 
 def call_llm(prompt: str) -> str:
-    return client.invoke(prompt)
+    return client_groq.invoke(prompt)
 
 class InsightAgent:
     def run(self, df: pd.DataFrame):
@@ -121,5 +121,6 @@ Return ONLY valid JSON in this format:
         fig.update_layout(title=f"{chart_type} Chart")
 
         return fig    
+
 
 
