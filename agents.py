@@ -18,6 +18,8 @@ load_dotenv()
 #os.environ["LANGCHAIN_API_KEY"]=os.getenv("LANGCHAIN_API_KEY")
 #os.environ["LANGCHAIN_TRACING_V2"]="true"
 #os.environ["LANGCHAIN_PROJECT"]="AI DATA ANALYST"
+
+from langchain_groq import ChatGroq
 os.environ["GROQ_API_KEY"] = st.secrets["GROQ_API_KEY"]
 if "GROQ_API_KEY" not in st.secrets:
     st.error("GROQ_API_KEY is not set in Streamlit Secrets")
@@ -126,6 +128,7 @@ Return ONLY valid JSON in this format:
         fig.update_layout(title=f"{chart_type} Chart")
 
         return fig    
+
 
 
 
