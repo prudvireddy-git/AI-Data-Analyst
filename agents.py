@@ -7,9 +7,8 @@ import traceback
 from typing import Dict
 import json
 import re
-from langchain_groq import ChatGroq
-from dotenv import load_dotenv
-load_dotenv()
+#from dotenv import load_dotenv
+#load_dotenv()
 #from langchain_ollama import OllamaLLM
 
 #client = OllamaLLM(model="deepseek-r1:8b")
@@ -22,8 +21,11 @@ load_dotenv()
 
 os.environ["GROQ_API_KEY"] = st.secrets["GROQ_API_KEY"]
 #groq_api_key=os.getenv("GROQ_API_KEY")
-client_groq=ChatGroq(groq_api_key=st.secrets["GROQ_API_KEY"],model_name='llama-3.1-8b-instant')
-
+#client_groq=ChatGroq(groq_api_key=st.secrets["GROQ_API_KEY"],model_name='llama-3.1-8b-instant')
+client_groq = ChatGroq(
+    model_name="llama-3.1-8b-instant",
+    groq_api_key=st.secrets["GROQ_API_KEY"]
+)
 
 def call_llm(prompt: str) -> str:
     return client_groq.invoke(prompt)
@@ -121,6 +123,7 @@ Return ONLY valid JSON in this format:
         fig.update_layout(title=f"{chart_type} Chart")
 
         return fig    
+
 
 
 
