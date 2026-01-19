@@ -7,8 +7,8 @@ import traceback
 from typing import Dict
 import json
 import re
-#from dotenv import load_dotenv
-#load_dotenv()
+from dotenv import load_dotenv
+load_dotenv()
 #from langchain_ollama import OllamaLLM
 
 #client = OllamaLLM(model="deepseek-r1:8b")
@@ -125,6 +125,7 @@ Return ONLY valid JSON in this format:
         fig.update_layout(title=f"{chart_type} Chart")
 
         return fig    
+
 
 
 
