@@ -8,20 +8,20 @@ from typing import Dict
 import ollama
 import json
 import re
-#from langchain_groq import ChatGroq
-#from dotenv import load_dotenv
-#load_dotenv()
-from langchain_ollama import OllamaLLM
+from langchain_groq import ChatGroq
+from dotenv import load_dotenv
+load_dotenv()
+#from langchain_ollama import OllamaLLM
 
-client = OllamaLLM(model="deepseek-r1:8b")
+#client = OllamaLLM(model="deepseek-r1:8b")
 
 #from langchain_community.llms import Ollama
 #client = Ollama(model="deepseek-r1:8b")
 #os.environ["LANGCHAIN_API_KEY"]=os.getenv("LANGCHAIN_API_KEY")
 #os.environ["LANGCHAIN_TRACING_V2"]="true"
 #os.environ["LANGCHAIN_PROJECT"]="AI DATA ANALYST"
-#groq_api_key=os.getenv("GROQ_API_KEY")
-#client_groq=ChatGroq(groq_api_key=groq_api_key,model_name='')
+groq_api_key=os.getenv("GROQ_API_KEY")
+client_groq=ChatGroq(groq_api_key=groq_api_key,model_name='llama-3.1-8b-instant')
 
 
 def call_llm(prompt: str) -> str:
@@ -118,4 +118,5 @@ Return ONLY valid JSON in this format:
             fig = px.box(df, y=x_col)
 
         fig.update_layout(title=f"{chart_type} Chart")
+
         return fig    
