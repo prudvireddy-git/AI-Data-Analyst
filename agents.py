@@ -69,7 +69,7 @@ pls give less and accurate response
 """
         code = call_llm(prompt)
         
-        return code
+        return code.content
     
 
 class VisualizationAgent:
@@ -129,6 +129,7 @@ Return ONLY valid JSON in this format:
         fig.update_layout(title=f"{chart_type} Chart")
 
         return fig    
+
 
 
 
