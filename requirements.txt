@@ -1,6 +1,4 @@
 pandas
-sqlite3
-traceback
 streamlit
 langchain
 langchain-core
@@ -11,4 +9,5 @@ pypdf
 python-dotenv
 kaleido
 plotly
+
 
