@@ -9,6 +9,7 @@ pypdf
 python-dotenv
 kaleido==0.2.1
 plotly
+altair==4.2.2
 
 
 
