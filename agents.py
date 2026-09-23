@@ -28,7 +28,7 @@ if "GROQ_API_KEY" not in st.secrets:
 #groq_api_key=os.getenv("GROQ_API_KEY")
 #client_groq=ChatGroq(groq_api_key=st.secrets["GROQ_API_KEY"],model_name='llama-3.1-8b-instant')
 client_groq = ChatGroq(
-    model_name="llama-3.3-70b-versatile",
+    model_name="qwen3.6-27b",
     groq_api_key=st.secrets["GROQ_API_KEY"]
 )
 
