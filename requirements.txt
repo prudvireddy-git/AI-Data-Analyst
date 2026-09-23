@@ -10,6 +10,3 @@ python-dotenv
 kaleido>=1.0.0
 plotly
 altair==4.2.2
-
-
-
