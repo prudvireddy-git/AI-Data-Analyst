@@ -61,11 +61,32 @@ class DataCleanerAgent:
 class AnalystAgent:
     def run(self, df: pd.DataFrame, question: str) -> Dict:
         prompt = f"""
-You are a data analyst.
-Dataset columns: {list(df.columns)}
-Question: {question}
-Write ONLY pandas code. Assume df is available.
-pls give less and accurate response
+You are an expert Data Analyst and Python Pandas assistant.
+
+Dataset columns:
+{list(df.columns)}
+
+User Question:
+{question}
+
+Your task:
+1. Understand the user's question.
+2. Write accurate Pandas code using the DataFrame `df`.
+3. Briefly explain what the code does.
+4. Keep the response concise and easy to understand.
+5. Do not use unnecessary code.
+6. Do not assume columns that are not present in the dataset.
+
+Return the answer in exactly this format:
+
+### Pandas Code
+```python
+# pandas code here
+Explanation
+
+Briefly explain what the code does and what result it produces.
+
+Only provide the Pandas code and its explanation.
 """
         code = call_llm(prompt)
         
