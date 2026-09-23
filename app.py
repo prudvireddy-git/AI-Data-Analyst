@@ -162,8 +162,8 @@ if 'df' in locals():
             data_for_analysis = st.session_state.cleaned_df if st.session_state.cleaned_df is not None else df
             analyst = AnalystAgent()
             result = analyst.run(data_for_analysis, user_msg)
-            st.markdown("Here is the generated Pandas logic:")
-            st.code(result)
+            st.markdown("Here my response")
+            st.markdown(result)
 
         st.session_state.chat_history.append({"role": "assistant", "content": "Generated analysis code and result."})
     
